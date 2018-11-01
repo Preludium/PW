@@ -1,52 +1,41 @@
-#include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <signal.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <string.h>
 
-int main(int argc, char* argv[])
+int main(int argc, char * argv[])
 {
-	int a = open(argv[1], O_RDONLY);
-	char buf[512];
-	int n, i, max = 0, num, j = 1,x;
-	
-	if(a == -1)
-	{
-            perror("File Opening");	
-            exit(1);
-	}
-	
-	while((n = read(a, buf, 512)) > 0)
-	{
-            x = 0;
-            while(x != n)
-            {
-                i = 0;
-                while(buf[x] != '\n')
-                {
-                    i++;
-                    x++;
-                }
-                if(i > max)
-                {
-                    max = i;
-                    num = j;
-                }
-		
-                lseek(a, 1, SEEK_CUR);
-                x++;
-                j++;
-            }
-	}
-        
-        if (n == -1) 
+    if(argc == 1 || argc == 3)
+    {
+    int j = 0;
+    char prog[sizeof(argv[0])];
+    for(int i = 2; i <= sizeof(argv[0]);i++)
+    {
+        prog[j]=*(argv[0]+i);
+        j++;
+    }
+    if (argc == 1)
+    {
+        printf("%s\n", prog);
+    }
+    else if (argc == 3)
+    {
+        if (strcmp(argv[1], prog) == 0)
         {
-            perror("Read error");
-            exit(1);
+            printf("%s\n", argv[2]);
         }
-        
-        printf("Longest line : %d, amount of characters : %d\n", num, max);
-	
-	close(a);
-	return 0;
+        else
+        {
+	    execlp(argv[1], argv[2], NULL);
+        }
+    }
+    }
+    else printf("Bledna ilosc argumentow\n");
+    return 0;   
 }
