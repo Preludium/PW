@@ -27,6 +27,10 @@ int main()
         {
             return 0;
         }
+        else if(strcmp(command,"\n") == 0)
+        {
+            continue;
+        }
         else
         {
             i = 0;
