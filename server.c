@@ -10,31 +10,61 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define MAX 100
+
 int main()
 {
-    char name[] = "ser_fifo";
-    int fd;
-    
-    while(true)
+    char server_name[] = "ser_fifo", client_name[MAX], command[MAX];
+    int fds, fdc;
+    int i, j;
+    char * args[MAX];
+    unlink(server_name);
+
+    if(mkfifo(server_name, S_IRUSR | S_IWUSR) == -1)
     {
-        if(mkfifo(name1, S_IRUSR | S_IWUSR) == -1)
+        perror("server fifo create error");
+        exit(1);
+    }
+    
+    while(1)
+    {
+        if((fds = open(server_name, O_RDWR)) == -1)
         {
-            perror("fifo create error");
+            perror("server fifo open error");
             exit(1);
         } 
-    
-        if (fork() == 0) 
+        read(fds, client_name, sizeof(client_name));
+        //unlink(client_name);
+
+        if((fdc = open(client_name, O_RDWR)) == -1)
         {
-            if ((fd = open(name, O_RDONLY)) == -1) 
-            {
-                perror("child fifo open error");
-                exit(1);
-            }
-            dup2(fd, 1);
-            execlp("ls", "ls", "-l", NULL);
+            perror("client fifo open error");
+            exit(1);
         }
-        
-        
+        read(fdc, command, sizeof(command));
+
+        i = 0;
+        args[0] = &command[0];
+        j = 1;
+        while(command[i] != '\n')
+        {
+            if(command[i] == ' ')
+            {
+                args[j] = &command[i+1];
+                command[i] = '\0';
+                j++;
+            }
+            i++;
+        }
+        command[i] = '\0';
+        args[j] = NULL;  
+
+        dup2(fds, 0);
+        if(fork() == 0)
+        {
+            execvp(args[0], args);
+            exit(0);
+        }      
     }
-     return 0;   
+    return 0;   
 }

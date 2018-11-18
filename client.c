@@ -10,50 +10,41 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define MAX 100
+
 int main()
 {
-    char name[] = "myfifo";
-    int status;
-    int j, i;
-    char * args[MAX];
-    bool switchon = true;
-    char command[MAX];
-    while(switchon == true)    
+    char server_name[] = "ser_fifo", client_name[] = "Kupa", command[MAX];
+    int fds, fdc;
+    while(1)    
     {
-        
-            i = 0;
-            args[0] = &command[0];
-            j = 1;
-            while(command[i] != '\n')
-            {
-                if(command[i] == ' ')
-                {
-                    args[j] = &command[i+1];
-                    command[i] = '\0';
-                    j++;
-                }
-                i++;
-            }
-            command[i] = '\0';
-            args[j] = NULL;
-            
-            if(fork() == 0)
-            {
-                execvp(args[0], args);
-                exit(-1);
-            }
-            else
-            {
-                wait(&status);
-                if(WEXITSTATUS(status) != 0)
-                {
-                    printf("Command \" ");
-                    for(int l=0; l<j;l++)
-                        printf("%s ",args[l]);
-                    printf("\" not found\n");
-                }
-            }
-        }
+        //printf("Client fifo name : ");
+        //scanf("%s", client_name);
+
+        unlink(client_name);
+        if(mkfifo(client_name, S_IRUSR | S_IWUSR) == -1)
+        {
+            perror("client fifo create error");
+            exit(1);
+        }  
+
+        printf("Command : ");
+        fgets(command, MAX, stdin);
+
+        if((fdc = open(client_name, O_RDWR)) == -1)
+        {
+            perror("client fifo open error");
+            exit(1);
+        }  
+        write(fdc, command, MAX);
+
+        if((fds = open(server_name, O_RDWR)) == -1)
+        {
+            perror("server fifo open error");
+            exit(1);
+        } 
+        write(fds, client_name, MAX);   
+        return 0; 
     }
     return 0;
 }
