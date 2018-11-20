@@ -14,12 +14,13 @@
 
 int main()
 {
-    char server_name[] = "ser_fifo", client_name[] = "Kupa", command[MAX];
+    char server_name[] = "ser_fifo", client_name[MAX], message[2 * MAX - 1];
     int fds, fdc;
-    int i, j;//, status;
-    char * args[MAX];
-    unlink(server_name);
+    int i, j;
+    char *args[MAX];
 
+    //      tworzenie fifo servera
+    unlink(server_name);
     if(mkfifo(server_name, S_IRUSR | S_IWUSR) == -1)
     {
         perror("server fifo create error");
@@ -28,51 +29,50 @@ int main()
     
     while(1)
     {
-        printf("otwiera server\n");
+        //      czytanie wiadomosci z fifo servera
+        printf("opening server\n");
         if((fds = open(server_name, O_RDONLY)) == -1)
         {
             perror("server fifo open error");
             exit(1);
         } 
-        printf("czyta z servera\n");
-        read(fds, command, sizeof(command));
+        printf("reading from server\n");
+        read(fds, message, sizeof(message));
         close(fds);
 
-        // printf("otwiera clienta %s\n", client_name);
-        // if((fdc = open(client_name, O_RDWR)) == -1)
-        // {
-        //     perror("client fifo open error");
-        //     exit(1);
-        // }
-        // printf("czyta z clienta %s\n", client_name);
-        // read(fdc, command, sizeof(command));
-        // printf("nie zesralo sie tym razem\n");
-        // close(fdc);
-
+        //      odkodowywanie wiadomosci
         i = 0;
-        args[0] = &command[0];
         j = 1;
-        while(command[i] != '\n')
+        while(message[i] != '#')
         {
-            if(command[i] == ' ')
+            client_name[i] = message[i];
+            i++;
+        }
+        client_name[i] = '\0';
+
+        i++;
+        args[0] = &message[i];
+        while(message[i] != '\0')
+        {
+            if(message[i] == ' ')
             {
-                args[j] = &command[i+1];
-                command[i] = '\0';
+                args[j] = &message[i+1];
+                message[i] = '\0';
                 j++;
             }
             i++;
         }
-        command[i] = '\0';
-        args[j] = NULL;  
+        args[j] = NULL;
 
+        //      pisanie do fifo clienta
         if((fdc = open(client_name, O_WRONLY)) == -1)
         {
             perror("client fifo open error");
             exit(1);
         }
 
-        // printf("dup2\n");
         dup2(fdc, 1);
+
         if(fork() == 0)
         {
             if(execvp(args[0], args) == -1)
@@ -84,22 +84,16 @@ int main()
                 exit(1);
             }
             exit(0);
-        }     
-        // wait(&status);
-        // if(WEXITSTATUS(status) != 0)
-        // {
-            
-        // } 
+        }    
+        close(1); 
+        close(fdc);
+
         if (wait(NULL) == -1) 
         {
             perror("wait on child");
             exit(1);
         }
-        close(fdc);
-        close(1);
-        printf("koniec petli servera\n");
 
-        // memset(client_name, 0, sizeof(client_name));    
     }
     return 0;   
 }
