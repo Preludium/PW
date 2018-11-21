@@ -64,17 +64,18 @@ int main()
         }
         args[j] = NULL;
 
-        //      pisanie do fifo clienta
-        if((fdc = open(client_name, O_WRONLY)) == -1)
-        {
-            perror("client fifo open error");
-            exit(1);
-        }
-
-        dup2(fdc, 1);
-
         if(fork() == 0)
         {
+            //      pisanie do fifo clienta
+            printf("opening client\n");
+            if((fdc = open(client_name, O_WRONLY)) == -1)
+            {
+                perror("client fifo open error");
+                exit(1);
+            }
+            printf("writing to client\n");
+            dup2(fdc, 1);
+            
             if(execvp(args[0], args) == -1)
             {
                 printf("Command \" ");
@@ -83,17 +84,18 @@ int main()
                 printf("\" not found\n");
                 exit(1);
             }
+            
+            close(fdc);
             exit(0);
         }    
-        close(1); 
-        close(fdc);
 
         if (wait(NULL) == -1) 
         {
             perror("wait on child");
             exit(1);
         }
-
+        
+        printf("the end\n\n");
     }
     return 0;   
 }

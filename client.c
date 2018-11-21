@@ -37,7 +37,7 @@ int main()
     while(1)    
     {
         //      ustalanie przekazywanej komendy
-        printf("Command : ");
+        printf("> ");
         fgets(command, sizeof(command), stdin);
 
         if(strcmp(command,"exit\n") == 0)
