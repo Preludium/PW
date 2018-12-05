@@ -1,3 +1,25 @@
-Netflox.7z
-Netflox.7z
-Netflox.7z
+Library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+entity z1 VHDL is
+
+port
+(
+	ledr:out std.logic_vector(2downto0)
+	sw:in std.logic_vector(2downto0)
+);
+end z1 VHDL
+architecture z1 of zad1 VHDL is 
+begin proces(sw)
+	begin
+		case sw is
+		when "000" => ledr <= "000";
+		when "001" => ledr <= "001";
+		when "010" => ledr <= "010";
+		when "011" => ledr <= "011";
+		when "100" => ledr <= "100";
+		when "101" => ledr <= "101";
+		when "110" => ledr <= "110";
+		when "111" => ledr <= "111";
+	end case;
+end proces;
+end z1
