@@ -42,7 +42,7 @@ int main()
         }
 
         while(1)
-            strcpy(buffer,"Murinho_dobry_trener\n");
+            strcpy(buffer,"haslo okon\n");
 
         if (shmdt((const void *) buffer) == -1) 
         {
