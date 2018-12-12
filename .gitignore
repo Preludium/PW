@@ -1,25 +1,99 @@
-Library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-entity z1 VHDL is
+--Mikolaj Szymczak sroda 8:00
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
 
-port
-(
-	ledr:out std.logic_vector(2downto0)
-	sw:in std.logic_vector(2downto0)
-);
-end z1 VHDL
-architecture z1 of zad1 VHDL is 
-begin proces(sw)
-	begin
-		case sw is
-		when "000" => ledr <= "000";
-		when "001" => ledr <= "001";
-		when "010" => ledr <= "010";
-		when "011" => ledr <= "011";
-		when "100" => ledr <= "100";
-		when "101" => ledr <= "101";
-		when "110" => ledr <= "110";
-		when "111" => ledr <= "111";
-	end case;
-end proces;
-end z1
+ENTITY CW4 IS
+PORT ( SW : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
+	HEX0 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX1 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX2 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX3 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX4 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX5 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX6 : OUT STD_LOGIC_VECTOR(0 TO 6);
+	HEX7 : OUT STD_LOGIC_VECTOR(0 TO 6));
+END CW4;
+
+ARCHITECTURE strukturalna OF CW4 IS
+CONSTANT SPACJA: STD_LOGIC_VECTOR(2 DOWNTO 0):="000"; -- KOD SPACJI
+
+
+--DEKLARACJA KOMPONENTÓW
+COMPONENT mux3bit.8to1 -- muliptekser
+PORT ( S, U0, U1, U2, U3, U4, U5, U6, U7: IN STD_LOGIC_VECTOR(2 DOWNTO 0);	--WEKTOR STERUJĄCY I 8 wektorów INFORMACYJNYCH
+	M0 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M1 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M2 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M3 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M4 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M5 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M6 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	M7 : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	);
+END COMPONENT;
+
+COMPONENT char7seg -- transkoder
+	PORT ( C : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		Display : OUT STD_LOGIC_VECTOR(0 TO 6)
+		);
+END COMPONENT; 
+
+SIGNAL M : STD_LOGIC_VECTOR(2 DOWNTO 0);
+
+BEGIN
+-- KONKRETYZACJA UŻYCIA KOMPONENTÓW
+MUX0: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M0);
+MUX1: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M1);
+MUX2: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M2);
+MUX3: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M3);
+MUX4: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M4);
+MUX5: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M5);
+MUX6: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M6);
+MUX7: mux3bit.8to1 PORT MAP (SW(17 DOWNTO 15), SW(14 DOWNTO 12), SW(11 DOWNTO 9), SW ( 8 DOWNTO 6 ) , SW ( 5 DOWNTO 3 ) , SW ( 2 DOWNTO 0), SPACJA, SPACJA, SPACJA, M7);
+
+-- KONKRETYZACJE KOLEJNYCH MULTIPLEKSERÓW UKŁADU
+H0: char7seg PORT MAP (M0, HEX0);
+H1: char7seg PORT MAP (M1, HEX1);
+H2: char7seg PORT MAP (M2, HEX2);
+H3: char7seg PORT MAP (M3, HEX3);
+H4: char7seg PORT MAP (M4, HEX4);
+H5: char7seg PORT MAP (M5, HEX5);
+H6: char7seg PORT MAP (M6, HEX6);
+H7: char7seg PORT MAP (M7, HEX7);
+
+-- KONKRETYZACJE KOLEJNYCH TRANSKODERÓW 
+END strukturalna;
+
+-- implementacja multipleksera 8 do 1 (wektor 3 bitowy)
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY mux3bit.8to1 is
+	PORT( S, U0, U1, U2, U3, U4, U5, U6, U7: IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		M : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
+		);
+END mux3bit.8to1;
+
+ARCHITECTURE strukturalna OF mux3bit_8to1 IS
+	
+END strukturalna;
+
+-- IMPLEMENTACJA TRANSKODERA
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY char7seg IS
+	PORT ( C : IN STD LOGIC VECTOR(2 DOWNTO 0);
+		Display : OUT STD LOGIC VECTOR(0 TO 7)
+		);
+END char7seg;
+
+ARCHITECTURE strukturalna OF char7seg IS
+BEGIN
+	with C select
+	Display<="1111110" when "000"; --O
+	Display<="1100111" when "001"; --P
+	Display<="1011011" when "010"; --S
+	Display<="1110111" when "011"; --A
+	Display<="1111111" when "100"; --B
+END strukturalna;
